@@ -7,7 +7,7 @@ import { routerLinks } from "@/router/link-router";
 <template>
   <div class="wrapper">
     <header>
-      <NavBar title="BreakingBad" :links="routerLinks"></NavBar>
+      <NavBar title="RickAndMorty" :links="routerLinks"></NavBar>
     </header>
 
     <main>
