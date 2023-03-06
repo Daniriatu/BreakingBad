@@ -1,0 +1,65 @@
+import rickAndMorty from "@/api/rickAndMorty";
+import type { Characters, Result } from "@/characters/interface/characters";
+import { reactive } from "vue";
+interface Store {
+  characters: {
+    list: Result[];
+    count: number;
+    isLoading: boolean;
+    hasError: boolean;
+    errorMessage: string | null;
+  };
+
+  startLoadingCharacters: () => void;
+
+  loadedCharacters: (data: Result[]) => void;
+
+  loadCharactersFailed: (error: string) => void;
+}
+
+const characterStore = reactive<Store>({
+  characters: {
+    count: 0,
+    errorMessage: null,
+    hasError: false,
+    isLoading: true,
+    list: [],
+  },
+
+  async startLoadingCharacters() {
+    console.log("start");
+    const { data } = await rickAndMorty.get<Characters>("/character");
+    this.loadedCharacters(data.results);
+  },
+
+  loadedCharacters(data: Result[] | string) {
+    if (typeof data === "string") {
+      return this.loadCharactersFailed(
+        "La respuesta no es una lista de personajes"
+      );
+    }
+    const characters = data;
+
+    this.characters = {
+      count: data.length,
+      errorMessage: null,
+      hasError: false,
+      isLoading: false,
+      list: characters as Result[],
+    };
+  },
+
+  loadCharactersFailed(error: string) {
+    this.characters = {
+      count: 0,
+      errorMessage: error,
+      hasError: true,
+      isLoading: false,
+      list: [],
+    };
+  },
+});
+
+characterStore.startLoadingCharacters();
+
+export default characterStore;

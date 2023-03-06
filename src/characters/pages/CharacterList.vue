@@ -4,29 +4,45 @@ import { useQuery } from "@tanstack/vue-query";
 import type { Result } from "@/characters/interface/characters";
 import rickAndMorty from "@/api/rickAndMorty";
 import type { Characters } from "../interface/characters";
+import characterStore from "@/store/character.store";
 
 const props = defineProps<{ title: string; visible: true }>();
 
-const getCharacters = async (): Promise<Result[]> => {
+const getCharactersCacheFirst = async (): Promise<Result[]> => {
+  if (characterStore.characters.count > 0) {
+    return characterStore.characters.list;
+  }
   const { data } = await rickAndMorty.get<Characters>("/character");
+
   return data.results;
 };
-const { isLoading, data: characters } = useQuery(
+useQuery(
   ["characters"],
-  getCharacters,
+  getCharactersCacheFirst,
   {
-    cacheTime: 1000 * 120,
-    refetchOnReconnect: "always",
+    onSuccess(data) {
+      characterStore.loadedCharacters(data);
+    },
   }
+  // {
+  //   cacheTime: 1000 * 120,
+  //   refetchOnReconnect: "always",
+  // }
 );
 </script>
 
 <template>
-  <h1 v-if="isLoading">Loading...</h1>
-  <div v-else>
+  <h1 v-if="characterStore.characters.isLoading">Loading...</h1>
+
+  <template v-else-if="characterStore.characters.hasError">
+    <h1>Error al cargar</h1>
+    <p>{{ characterStore.characters.errorMessage }}</p>
+  </template>
+
+  <template v-else>
     <h2>{{ props.title }}</h2>
-    <CardList :characters="characters!" />
-  </div>
+    <CardList :characters="characterStore.characters.list" />
+  </template>
 </template>
 
 <style scoped></style>
