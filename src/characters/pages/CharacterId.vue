@@ -1,27 +1,34 @@
 <script setup lang="ts">
 import { useRoute } from "vue-router";
-import rickAndMorty from "@/api/rickAndMorty";
-import type { Result } from "../interface/characters";
-import { useQuery } from "@tanstack/vue-query";
+// import rickAndMorty from "@/api/rickAndMorty";
+// import type { Result } from "../interface/characters";
+// import { useQuery } from "@tanstack/vue-query";
 // import { reactive, ref } from "vue";
+import characterStore from "@/store/character.store";
 
 const route = useRoute();
 
 const { id } = route.params as { id: string };
 
-const getCharacter = async (characterId: string): Promise<Result> => {
-  const { data } = await rickAndMorty.get<Result>(`/character/${characterId}`);
-  return data;
-};
+const characterID: number = Number(id) - 1;
 
-const { data: character } = useQuery(
-  ["character", id],
-  () => getCharacter(id)
-  // {
-  //   cacheTime: 1000 * 20,
-  //   refetchOnReconnect: "always",
-  // }
-);
+const character = characterStore.characters.list[characterID];
+
+console.log(character);
+
+// const getCharacter = async (characterId: string): Promise<Result> => {
+//   const { data } = await rickAndMorty.get<Result>(`/character/${characterId}`);
+//   return data;
+// };
+
+// const { data: character } = useQuery(
+//   ["character", id],
+//   () => getCharacter(id)
+//   // {
+//   //   cacheTime: 1000 * 20,
+//   //   refetchOnReconnect: "always",
+//   // }
+// );
 </script>
 
 <template>
